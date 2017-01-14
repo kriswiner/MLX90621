@@ -607,7 +607,7 @@ void calculateTO() {
     v_ir_comp = v_ir_tgc_comp / emissivity;
 
     sx = ks4*pow(pow(alpha_comp, 3)*v_ir_comp+pow(alpha_comp, 4)*tak4, 0.25);    
-    float temperature = pow((v_ir_comp / (alpha_comp*(1 - ks4*273.15) + sx)) + tak4, 0.25) - 273.15
+    float temperature = pow((v_ir_comp / (alpha_comp*(1 - ks4*273.15) + sx)) + tak4, 0.25) - 273.15;
 
     temperatures[i] = temperature;
     if (minTemp == NULL || temperature < minTemp) {
