@@ -70,6 +70,8 @@ See: http://ww1.microchip.com/downloads/en/DeviceDoc/21709J.pdf
 uint8_t eepromData[256];
 
 // EEPROM data values
+#define KS_SCALE          0xC0
+#define KS4_EE            0xC4
 #define CAL_ACOMMON_L     0xD0
 #define CAL_ACOMMON_H     0xD1
 #define KT_SCALE          0xD2
@@ -104,7 +106,7 @@ float v_ir_off_comp, ksta, v_ir_tgc_comp, v_ir_comp, alpha_comp;
 float tak4, resolution_comp;
 int16_t a_common; 
 uint16_t k_t1_scale, k_t2_scale, a_i_scale, b_i_scale;
-float k_t1, k_t2, emissivity, tgc, alpha_cp, a_cp, b_cp, v_th, tmpTemp;
+float k_t1, k_t2, emissivity, tgc, alpha_cp, a_cp, b_cp, v_th, tmpTemp, ks_scale, ks4,sx;
 uint16_t ptat;
 int16_t cpix;
 float a_ij, b_ij, alpha_ij;
@@ -510,7 +512,7 @@ void calculateConstants() {
   b_i_scale = (uint16_t) eepromData[CAL_BI_SCALE] & 0x000F;
   Serial.print("a_i_scale = "); Serial.println(a_i_scale);
   Serial.print("b_i_scale = "); Serial.println(b_i_scale);
-
+  
   alpha_cp = (float)(((uint16_t)eepromData[CAL_alphaCP_H] << 8) | eepromData[CAL_alphaCP_L]) /
          (pow(2.0, eepromData[CAL_A0_SCALE]) * resolution_comp);
   Serial.print("alpha_cp = "); Serial.println(alpha_cp);
@@ -521,7 +523,10 @@ void calculateConstants() {
   Serial.print("b_cp = "); Serial.println(b_cp);
   tgc  = (float) (((int16_t)eepromData[CAL_TGC] << 8) >> 8) / 32.0;
   Serial.print("tgc = "); Serial.println(tgc);
-
+  
+  ks_scale = (int) eepromData[KS_SCALE]&15;
+  ks4  = (float) (((int16_t)eepromData[KS4_EE] << 8) >> 8) / pow(2,ks_scale-8);
+  Serial.print("ks4 = "); Serial.println(ks4);
   k_t1_scale = (uint16_t) (eepromData[KT_SCALE] & 0x00F0) >> 4;
   Serial.print("k_t1_scale = "); Serial.println(k_t1_scale);
   k_t2_scale = (uint16_t) (eepromData[KT_SCALE] & 0x000F) + 10;
@@ -605,7 +610,9 @@ void calculateTO() {
     ksta = (float) (((int16_t)eepromData[CAL_KSTA_H] <<8) | eepromData[CAL_KSTA_L]) / pow(2.0, 20.0);
     alpha_comp = (1 + ksta * (Tambient - 25.0)) * (alpha_ij - tgc * alpha_cp);
     v_ir_comp = v_ir_tgc_comp / emissivity;
-    float temperature = pow((v_ir_comp / alpha_comp) + tak4, 0.25) - 273.15;
+
+    sx = ks4*pow(pow(alpha_comp, 3)*v_ir_comp+pow(alpha_comp, 4)*tak4, 0.25);    
+    float temperature = pow((v_ir_comp / (alpha_comp*(1 - ks4*273.15) + sx)) + tak4, 0.25) - 273.15
 
     temperatures[i] = temperature;
     if (minTemp == NULL || temperature < minTemp) {
