@@ -22,11 +22,6 @@
 #include <SPI.h>
 #include <i2c_t3.h>
 
-#if defined(__SAM3X8E__)
-    #undef __FlashStringHelper::F(string_literal)
-    #define F(string_literal) string_literal
-#endif
-
 Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, rst);
 float p = 3.1415926;
 
@@ -106,7 +101,7 @@ float v_ir_off_comp, ksta, v_ir_tgc_comp, v_ir_comp, alpha_comp;
 float tak4, resolution_comp;
 int16_t a_common; 
 uint16_t k_t1_scale, k_t2_scale, a_i_scale, b_i_scale;
-float k_t1, k_t2, emissivity, tgc, alpha_cp, a_cp, b_cp, v_th, tmpTemp, ks_scale, ks4,sx;
+float k_t1, k_t2, emissivity, tgc, alpha_cp, a_cp, b_cp, v_th, tmpTemp, ks_scale, ks4, sx;
 uint16_t ptat;
 int16_t cpix;
 float a_ij, b_ij, alpha_ij;
@@ -524,8 +519,8 @@ void calculateConstants() {
   tgc  = (float) (((int16_t)eepromData[CAL_TGC] << 8) >> 8) / 32.0;
   Serial.print("tgc = "); Serial.println(tgc);
   
-  ks_scale = (int) eepromData[KS_SCALE]&15;
-  ks4  = (float) (((int16_t)eepromData[KS4_EE] << 8) >> 8) / pow(2,ks_scale-8);
+  ks_scale = (uint8_t) eepromData[KS_SCALE];
+  ks4  = (float) (((int16_t)eepromData[KS4_EE] << 8) >> 8) / pow(2, ks_scale + 8);
   Serial.print("ks4 = "); Serial.println(ks4);
   k_t1_scale = (uint16_t) (eepromData[KT_SCALE] & 0x00F0) >> 4;
   Serial.print("k_t1_scale = "); Serial.println(k_t1_scale);
