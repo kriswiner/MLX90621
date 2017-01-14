@@ -605,7 +605,7 @@ void calculateTO() {
     ksta = (float) (((int16_t)eepromData[CAL_KSTA_H] <<8) | eepromData[CAL_KSTA_L]) / pow(2.0, 20.0);
     alpha_comp = (1 + ksta * (Tambient - 25.0)) * (alpha_ij - tgc * alpha_cp);
     v_ir_comp = v_ir_tgc_comp / emissivity;
-    float temperature = pow((v_ir_comp / alpha_comp) + tak4, 1.0 / 4.0) - 273.15;
+    float temperature = pow((v_ir_comp / alpha_comp) + tak4, 0.25) - 273.15;
 
     temperatures[i] = temperature;
     if (minTemp == NULL || temperature < minTemp) {
