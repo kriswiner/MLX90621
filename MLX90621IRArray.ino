@@ -520,7 +520,7 @@ void calculateConstants() {
   Serial.print("tgc = "); Serial.println(tgc);
   
   ks_scale = eepromData[KS_SCALE] & 0x0F; // use only lower nibble  
-  ks4  = (float) (((int16_t)eepromData[KS4_EE] << 8) >> 8) / pow(2, ks_scale + 8);
+  ks4  = (float) (( (int16_t)(eepromData[KS4_EE] << 8) ) >> 8) / pow(2, ks_scale + 8);
   Serial.print("ks4 = "); Serial.println(ks4);
   k_t1_scale = (uint16_t) (eepromData[KT_SCALE] & 0x00F0) >> 4;
   Serial.print("k_t1_scale = "); Serial.println(k_t1_scale);
